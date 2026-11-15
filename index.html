@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="id"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#B83A66">
+<meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-capable" content="yes">
+<script>
+(function(){var m="auto";try{m=localStorage.getItem("lunara_mode")||"auto"}catch(e){}
+var ui=m==="mobile"?"m":m==="desktop"?"d":(matchMedia("(max-width:760px)").matches?"m":"d");
+document.documentElement.dataset.ui=ui;document.documentElement.dataset.mode=m;
+if(m==="desktop")document.querySelector("meta[name=viewport]").content="width=1100, initial-scale=1"})();
+</script>
+<title>Lunara – Kalender Bulanan Wanita</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=Poppins:wght@500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head><body>
+<header><div class="bar">
+<div class="logo" onclick="go('beranda')" role="link" tabindex="0"><svg width="28" height="28" viewBox="0 0 28 28" aria-hidden="true"><circle cx="14" cy="14" r="12" fill="var(--pri)"/><circle cx="19" cy="11" r="10" fill="var(--card)"/></svg><span>Lunara</span></div>
+<div class="search"><input id="q" type="search" placeholder="Cari artikel atau catatan…" aria-label="Cari artikel atau catatan" list="sg"><datalist id="sg"><option value="nyeri haid"><option value="zat besi"><option value="tidur"><option value="suasana hati"><option value="masa subur"></datalist><button class="btn" onclick="doSearch()">Cari</button></div>
+<button class="ghost" onclick="go('pengingat')" aria-label="Notifikasi pengingat">Notifikasi <b id="nb"></b></button>
+<button class="ghost" onclick="go('akun')">Akun</button>
+<button class="ghost mb" id="modeBtn" onclick="cycleMode()" aria-label="Ganti mode tampilan"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="7" y="2" width="10" height="20" rx="2" class="only-m"/><rect x="2" y="4" width="20" height="13" rx="2" class="only-d"/><path d="M8 21h8" class="only-d"/></svg><span id="modeLbl">Auto</span></button></div>
+<nav class="top" aria-label="Menu utama"><a href="#beranda" data-n="beranda">Beranda</a><a href="#catat" data-n="catat">Catat</a><a href="#riwayat" data-n="riwayat">Riwayat</a><a href="#artikel" data-n="artikel">Artikel</a><a href="#pengingat" data-n="pengingat">Pengingat</a></nav></header>
+<main>
+<div class="crumb" id="crumb"></div>
+
+<section class="view" id="v-beranda"><div class="grid"><div>
+<div class="card"><div class="mh"><button onclick="mon(-1)" aria-label="Bulan sebelumnya">◀</button><h2 id="mt"></h2><button onclick="mon(1)" aria-label="Bulan berikutnya">▶</button></div>
+<div class="cal" id="cal"></div>
+<div class="leg"><span><i style="background:var(--m)"></i>M menstruasi</span><span><i style="background:var(--s);border:1.5px dashed var(--o)"></i>S masa subur</span><span><i style="background:var(--o)"></i>O perkiraan ovulasi</span><span><i style="border:3px solid var(--pri)"></i>Hari ini</span></div>
+<p style="margin:8px 0 0;font-size:.85rem;color:var(--mut)">Ketuk tanggal untuk mencatat. Perkiraan bersifat umum, bukan diagnosis medis.</p></div>
+<div class="card ban"><div id="tipimg"></div><div><h3 id="tipt"></h3><p id="tipx" style="margin:6px 0 10px"></p><button onclick="go('artikel')">Baca artikel lain</button></div></div></div>
+<div><div class="card"><div style="color:var(--mut)">Fase hari ini</div><div class="big" id="hk"></div><div id="fs"></div><p id="nx" style="margin:8px 0 0"></p></div>
+<div class="card"><h3>Catat cepat</h3><label for="qf">Aliran</label><select id="qf"></select><label for="qm">Suasana hati</label><select id="qm"></select><div class="err" id="qe"></div><button class="btn" style="width:100%" onclick="quick()">Catat hari ini</button></div></div></div></section>
+
+<section class="view" id="v-catat"><div class="card" style="max-width:640px"><h2>Catat harian</h2>
+<label for="cd">Tanggal</label><input type="date" id="cd">
+<div class="row"><div><label for="cf">Aliran</label><select id="cf"></select></div><div><label for="cm">Suasana hati</label><select id="cm"></select></div></div>
+<label>Gejala</label><div class="chips" id="cs"></div>
+<label for="cn">Catatan</label><textarea id="cn" rows="3" placeholder="Tulis hal lain yang ingin diingat (opsional)"></textarea>
+<div class="err" id="ce"></div>
+<div class="row" style="justify-content:flex-end;margin-top:12px"><button onclick="go('beranda')">Batal</button><button class="btn" onclick="saveLog()">Simpan catatan</button><button class="ghost" id="cdel" onclick="delLog()">Hapus catatan</button></div></div></section>
+
+<section class="view" id="v-riwayat"><div class="grid"><div><div class="card"><div class="mh"><h2>Riwayat siklus</h2><button onclick="exportP()">Ekspor PDF</button></div><div id="chart"></div></div>
+<div class="card ov"><h3>Tabel catatan</h3><table><thead><tr><th>Tanggal</th><th>Aliran</th><th>Hati</th><th>Gejala</th></tr></thead><tbody id="tb"></tbody></table></div></div>
+<div class="card"><h3>Filter bulan</h3><label for="fm">Bulan</label><input type="month" id="fm"><button style="margin-top:10px;width:100%" onclick="$('#fm').value='';hist()">Tampilkan semua</button><div class="big" id="avg" style="margin-top:16px"></div><div style="color:var(--mut)">rata-rata siklus dari catatan</div></div></div></section>
+
+<section class="view" id="v-artikel"><h2 style="margin-bottom:12px">Artikel kesehatan</h2><div id="al" class="art"></div><div id="ad" class="card" style="display:none"></div></section>
+
+<section class="view" id="v-pengingat"><div class="grid"><div class="card"><h2>Pengingat</h2><div id="rl"></div></div>
+<div class="card"><h3>Tambah pengingat</h3><label for="rt">Jenis</label><select id="rt"><option>Haid berikutnya</option><option>Masa subur</option><option>Minum vitamin</option><option>Lainnya</option></select><label for="rw">Waktu</label><input type="time" id="rw" value="08:00"><button class="btn" style="width:100%;margin-top:14px" onclick="addR()">Tambah pengingat</button></div></div></section>
+
+<section class="view" id="v-akun"><div class="card" style="max-width:640px"><h2>Profil dan pengaturan</h2>
+<label for="pn">Nama</label><input id="pn" placeholder="Nama panggilan">
+<div class="row"><div><label for="pc">Panjang siklus (hari)</label><input type="number" id="pc" min="21" max="45"></div><div><label for="pp">Lama haid (hari)</label><input type="number" id="pp" min="2" max="10"></div></div>
+<label for="pl">Hari pertama haid terakhir</label><input type="date" id="pl"><div class="err" id="pe"></div>
+<div class="row" style="justify-content:flex-end;margin-top:12px"><button class="btn" onclick="saveP()">Simpan profil</button></div>
+<h3 style="margin-top:24px">Mode tampilan</h3><div class="seg" role="radiogroup" aria-label="Mode tampilan">
+<label><input type="radio" name="mode" value="auto"><span>Otomatis<small>Menyesuaikan layar</small></span></label>
+<label><input type="radio" name="mode" value="mobile"><span>Mode mobile<small>Ringkas, menu bawah</small></span></label>
+<label><input type="radio" name="mode" value="desktop"><span>Mode desktop<small>Lebar, menu atas</small></span></label></div>
+<h3 style="margin-top:24px">Privasi data</h3><p style="color:var(--mut)">Semua data tersimpan hanya di peramban ini dan tidak dikirim ke server.</p><button onclick="wipe()">Hapus semua data saya</button></div></section>
+</main>
+<footer><div><span>Lunara – kalender bulanan wanita<br>Perkiraan fase hanya informasi umum, bukan pengganti saran tenaga kesehatan.</span><span><a href="#akun">Kebijakan privasi</a> · Bantuan: bantuan@lunara.example · Senin–Jumat 09.00–17.00</span></div></footer>
+<nav class="bot" aria-label="Menu utama"><a href="#beranda" data-n="beranda">Beranda</a><a href="#catat" data-n="catat">Catat</a><a href="#riwayat" data-n="riwayat">Riwayat</a><a href="#artikel" data-n="artikel">Artikel</a><a href="#pengingat" data-n="pengingat">Pengingat</a></nav>
+<div class="toast" id="toast" role="status"></div>
+<script src="script.js"></script>
+</body></html>
